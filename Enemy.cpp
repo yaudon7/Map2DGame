@@ -1,6 +1,7 @@
 #include "Enemy.h"
 #include "time.h"
 #include "Stage.h"
+#include "Player.h"
 
 namespace
 {
@@ -27,17 +28,27 @@ Enemy::~Enemy()
 
 void Enemy::Update()
 {
+	//プレイヤーの位置を取得
+	Point playerPos = FindGameObject<Player>()->GetPlayerPos();
+	//プレイヤーと敵の位置の差を求める　diff = differenceの略
+	Point diff = { playerPos.x - pos_.x, playerPos.y - pos_.y };
+
 	//GetRand(数値)
 	//3秒に1回向きをランダムに変える
-	static float dir_timer = 3.0f;
+	//static float dir_timer = 3.0f;
 	static float prog_timer = 0.5f;
 	float dt = Time::DeltaTime();
-	dir_timer = dir_timer - dt;
+	//dir_timer = dir_timer - dt;
 	prog_timer = prog_timer - dt;
-	if (dir_timer < 0.0f)
+
+
+	if (abs(diff.x) > abs(diff.y))
 	{
-		dir_ = (DIR)(GetRand(3));
-		dir_timer = 3.0f + dir_timer;
+		dir_ = (diff.x > 0) ? RIGHT : LEFT;
+	}
+	else
+	{
+		dir_ = (diff.y > 0) ? DOWN : UP;
 	}
 
 	Point newPos = pos_;
@@ -56,6 +67,7 @@ void Enemy::Update()
 			break;
 		case RIGHT:
 			newPos.x += ENEMY_DRAW_SIZE;
+				;
 			break;
 		default:
 			break;
