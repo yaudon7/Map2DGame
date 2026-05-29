@@ -32,7 +32,11 @@ void Enemy::Update()
 	Point playerPos = FindGameObject<Player>()->GetPlayerPos();
 	//プレイヤーと敵の位置の差を求める　diff = differenceの略
 	Point diff = { playerPos.x - pos_.x, playerPos.y - pos_.y };
-
+	Point forward;
+	float dis = sqrt(diff.x * diff.x + diff.y * diff.y);
+	float viewDis = 200.0f;
+	float viewAngle = 90.0f;
+	
 	//GetRand(数値)
 	//3秒に1回向きをランダムに変える
 	//static float dir_timer = 3.0f;
@@ -41,18 +45,19 @@ void Enemy::Update()
 	//dir_timer = dir_timer - dt;
 	prog_timer = prog_timer - dt;
 
-
-	if (abs(diff.x) > abs(diff.y))
-	{
-		dir_ = (diff.x > 0) ? RIGHT : LEFT;
-	}
-	else
-	{
-		dir_ = (diff.y > 0) ? DOWN : UP;
-	}
-
+	
 	Point newPos = pos_;
-	if (prog_timer < 0.0f)
+
+		if (abs(diff.x) > abs(diff.y))
+		{
+			dir_ = (diff.x > 0) ? RIGHT : LEFT;
+		}
+		else
+		{
+			dir_ = (diff.y > 0) ? DOWN : UP;
+		}
+
+	if (prog_timer < 0.0f && isFindPlayer)
 	{
 		switch (dir_)
 		{
@@ -67,11 +72,11 @@ void Enemy::Update()
 			break;
 		case RIGHT:
 			newPos.x += ENEMY_DRAW_SIZE;
-				;
 			break;
 		default:
 			break;
 		}
+
 		int mapValue = FindGameObject<Stage>()->GetMap(newPos.x / CHA_SIZE, newPos.y / CHA_SIZE);
 		
 		//移動先がステージの外に出ないようにする->壁じゃないなら移動
@@ -81,7 +86,6 @@ void Enemy::Update()
 		}
 		prog_timer = 0.5f + prog_timer;
 	}
-
 }
 
 void Enemy::Draw()
