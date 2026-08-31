@@ -3,6 +3,14 @@
 #include "global.h"
 
 
+enum PANDA_STATE
+{
+	Patrol,
+	Chase,
+	Attack,
+	Search
+};
+
 class Enemy :
     public GameObject
 {
@@ -13,8 +21,11 @@ public:
 	Enemy();
 	~Enemy();
 	void Update() override;
+	void PatrolUpdate();
 	void Draw() override;
 private:
-	bool isFindPlayer;
+	bool isFindPlayer_;
+	bool isAttackRange_;
+	PANDA_STATE state_;
 };
 

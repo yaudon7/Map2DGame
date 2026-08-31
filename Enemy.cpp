@@ -15,11 +15,14 @@ namespace
 
 
 Enemy::Enemy()
-	: GameObject() 
+	: GameObject()
 {
 	hImage_ = LoadGraph("Assets/panda_R.png");
 	pos_ = ENEMY_START_POS; //32はブロックの位置pos_
 	dir_ = INIT_ENEMY_DIR;
+	state_ = Patrol;
+	isFindPlayer_ = false;
+	isAttackRange_ = false;
 }
 
 Enemy::~Enemy()
@@ -28,63 +31,107 @@ Enemy::~Enemy()
 
 void Enemy::Update()
 {
-	//プレイヤーの位置を取得
-	Point playerPos = FindGameObject<Player>()->GetPlayerPos();
-	//プレイヤーと敵の位置の差を求める　diff = differenceの略
-	Point diff = { playerPos.x - pos_.x, playerPos.y - pos_.y };
-	Point forward;
-	float dis = sqrt(diff.x * diff.x + diff.y * diff.y);
-	float viewDis = 200.0f;
-	float viewAngle = 90.0f;
-	
-	//GetRand(数値)
-	//3秒に1回向きをランダムに変える
-	//static float dir_timer = 3.0f;
-	static float prog_timer = 0.5f;
-	float dt = Time::DeltaTime();
-	//dir_timer = dir_timer - dt;
-	prog_timer = prog_timer - dt;
+	switch (state_)
+	{
+	case Patrol:
+		PatrolUpdate();
+		break;
+	case:
+	}
+	default:
+		break;
+}
+//プレイヤーの位置を取得
+Point playerPos = FindGameObject<Player>()->GetPlayerPos();
+//プレイヤーと敵の位置の差を求める　diff = differenceの略
+Point diff = { playerPos.x - pos_.x, playerPos.y - pos_.y };
+Point forward;
+float dis = sqrt(diff.x * diff.x + diff.y * diff.y);
+float viewDis = 200.0f;
+float viewAngle = 90.0f;
 
-	
+//GetRand(数値)
+//3秒に1回向きをランダムに変える
+static float dir_timer = 3.0f;
+static float prog_timer = 0.5f;
+float dt = Time::DeltaTime();
+dir_timer = dir_timer - dt;
+prog_timer = prog_timer - dt;
+
+
+Point newPos = pos_;
+
+if (abs(diff.x) > abs(diff.y))
+{
+	dir_ = (diff.x > 0) ? RIGHT : LEFT;
+}
+else
+{
+	dir_ = (diff.y > 0) ? DOWN : UP;
+}
+
+if (prog_timer < 0.0f && isFindPlayer_)
+{
+	switch (dir_)
+	{
+	case UP:
+		newPos.y -= ENEMY_DRAW_SIZE;
+		break;
+	case DOWN:
+		newPos.y += ENEMY_DRAW_SIZE;
+		break;
+	case LEFT:
+		newPos.x -= ENEMY_DRAW_SIZE;
+		break;
+	case RIGHT:
+		newPos.x += ENEMY_DRAW_SIZE;
+		break;
+	default:
+		break;
+	}
+
+	int mapValue = FindGameObject<Stage>()->GetMap(newPos.x / CHA_SIZE, newPos.y / CHA_SIZE);
+
+	//移動先がステージの外に出ないようにする->壁じゃないなら移動
+	if (mapValue != 1)
+	{
+		pos_ = newPos;
+	}
+	prog_timer = 0.5f + prog_timer;
+}
+}
+
+void Enemy::PatrolUpdate()
+{
+	float patrol_timer = 3.0f;
+	if (isFindPlayer_)
+	{
+		state_ = Chase;
+	}
+	patrol_timer = patrol_timer - Time::DeltaTime();
+	if (patrol_timer <= 0.0f) {
+		dir_ = (DIR)GetRand(MAX_DIR);
+		patrol_timer = 3.0f;
+	}
+
 	Point newPos = pos_;
 
-		if (abs(diff.x) > abs(diff.y))
-		{
-			dir_ = (diff.x > 0) ? RIGHT : LEFT;
-		}
-		else
-		{
-			dir_ = (diff.y > 0) ? DOWN : UP;
-		}
-
-	if (prog_timer < 0.0f && isFindPlayer)
+	switch (dir_)
 	{
-		switch (dir_)
-		{
-		case UP:
-			newPos.y -= ENEMY_DRAW_SIZE;
-			break;
-		case DOWN:
-			newPos.y += ENEMY_DRAW_SIZE;
-			break;
-		case LEFT:
-			newPos.x -= ENEMY_DRAW_SIZE;
-			break;
-		case RIGHT:
-			newPos.x += ENEMY_DRAW_SIZE;
-			break;
-		default:
-			break;
-		}
-
-		int mapValue = FindGameObject<Stage>()->GetMap(newPos.x / CHA_SIZE, newPos.y / CHA_SIZE);
-		
-		//移動先がステージの外に出ないようにする->壁じゃないなら移動
-		if (mapValue != 1)
-		{
-			pos_ = newPos;
-		}
-		prog_timer = 0.5f + prog_timer;
+	case UP:
+		newPos.y -= ENEMY_DRAW_SIZE;
+		break;
+	case DOWN:
+		newPos.y += ENEMY_DRAW_SIZE;
+		break;
+	case LEFT:
+		newPos.x -= ENEMY_DRAW_SIZE;
+		break;
+	case RIGHT:
+		newPos.x += ENEMY_DRAW_SIZE;
+		break;
+	default:
+		break;
 	}
 }
 
@@ -101,9 +148,9 @@ void Enemy::Draw()
 		{  nowFrame * ENEMY_SIZE, 2 * ENEMY_SIZE, ENEMY_SIZE, ENEMY_SIZE}
 	};
 	DrawBox(pos_.x, pos_.y, pos_.x + ENEMY_DRAW_SIZE, pos_.y + ENEMY_DRAW_SIZE,
-		GetColor(255, 255, 0), FALSE,2);
-	DrawRectExtendGraph(pos_.x, pos_.y,pos_.x + ENEMY_DRAW_SIZE, pos_.y + ENEMY_DRAW_SIZE,
-		               iRect[dir_].x, iRect[dir_].y, iRect[dir_].w, iRect[dir_].h, hImage_, TRUE);
+		GetColor(255, 255, 0), FALSE, 2);
+	DrawRectExtendGraph(pos_.x, pos_.y, pos_.x + ENEMY_DRAW_SIZE, pos_.y + ENEMY_DRAW_SIZE,
+		iRect[dir_].x, iRect[dir_].y, iRect[dir_].w, iRect[dir_].h, hImage_, TRUE);
 	if (animTimer < 0) {
 		frame = (++frame) % 4;
 		animTimer = ANIM_INTERVAL + animTimer;
