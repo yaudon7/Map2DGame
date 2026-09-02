@@ -22,10 +22,15 @@ public:
 	~Enemy();
 	void Update() override;
 	void PatrolUpdate();
+	void ChaseUpdate();
 	void Draw() override;
+	bool CheckPlayerInSight();
+	bool IsAttackRange();
 private:
 	bool isFindPlayer_;
 	bool isAttackRange_;
+	float patrol_timer;
+	float chase_timer;
 	PANDA_STATE state_;
 };
 
