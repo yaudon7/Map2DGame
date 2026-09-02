@@ -25,6 +25,8 @@ Enemy::Enemy()
 	isAttackRange_ = false;
 	patrol_timer = 3.0f;
 	chase_timer = 0.0f;
+	search_timer = 1.0f;
+	search_end_timer = 4.0f;
 }
 
 Enemy::~Enemy()
@@ -40,58 +42,23 @@ void Enemy::Update()
 		break;
 	case Chase:
 		ChaseUpdate();
+		break;
+	case Attack:
+		AttackUpdate();
+		break;
+	case Search:
+		SearchUpdate();
+		break;
 	}
 
+	Point newPos = pos_;
 
-	//GetRand(数値)
-	//3秒に1回向きをランダムに変える
-	/*static float dir_timer = 3.0f;
-	static float prog_timer = 0.5f;
-	float dt = Time::DeltaTime();
-	dir_timer = dir_timer - dt;
-	prog_timer = prog_timer - dt;*/
-
-
-	/*	Point newPos = pos_;*/
-
-		/*if (abs(diff.x) > abs(diff.y))
-		{
-			dir_ = (diff.x > 0) ? RIGHT : LEFT;
-		}
-		else
-		{
-			dir_ = (diff.y > 0) ? DOWN : UP;
-		}
-
-		if (prog_timer < 0.0f && isFindPlayer_)
-		{
-			switch (dir_)
-			{
-			case UP:
-				newPos.y -= ENEMY_DRAW_SIZE;
-				break;
-			case DOWN:
-				newPos.y += ENEMY_DRAW_SIZE;
-				break;
-			case LEFT:
-				newPos.x -= ENEMY_DRAW_SIZE;
-				break;
-			case RIGHT:
-				newPos.x += ENEMY_DRAW_SIZE;
-				break;
-			default:
-				break;
-			}*/
-
-			//int mapValue = FindGameObject<Stage>()->GetMap(newPos.x / CHA_SIZE, newPos.y / CHA_SIZE);
-
-			////移動先がステージの外に出ないようにする->壁じゃないなら移動
-			//if (mapValue != 1)
-			//{
-			//	pos_ = newPos;
-			//}
-			//prog_timer = 0.5f + prog_timer;
-
+	int mapValue = FindGameObject<Stage>()->GetMap(newPos.x / CHA_SIZE, newPos.y / CHA_SIZE);
+	//移動先がステージの外に出ないようにする->壁じゃないなら移動
+	if (mapValue != 1)
+	{
+		pos_ = newPos;
+	}
 }
 
 void Enemy::PatrolUpdate()
@@ -119,7 +86,7 @@ void Enemy::PatrolUpdate()
 	}
 
 	if (patrol_timer <= 0.0f) {
-		dir_ = (DIR)GetRand(MAX_DIR);;
+		dir_ = (DIR)GetRand(3);
 		patrol_timer = 3.0f;
 	}
 
@@ -187,6 +154,42 @@ void Enemy::ChaseUpdate()
 	}
 }
 
+void Enemy::AttackUpdate()
+{
+	DrawFormatString(0, 20, GetColor(255, 0, 0), "Attack!!");
+	if (IsAttackRange() == false)
+	{
+		search_end_timer = 4.0f;
+		state_ = Search;
+		return;
+	}
+}
+
+void Enemy::SearchUpdate()
+{
+	search_timer -= Time::DeltaTime();
+	search_end_timer -= Time::DeltaTime();
+
+	if (search_timer <= 0.0f)
+	{
+		dir_ = (DIR)((dir_ + 1) % 4);
+
+		search_timer = 1.0f;
+	}
+
+	if (CheckPlayerInSight())
+	{
+		state_ = Attack;
+		return;
+	}
+
+	if (!CheckPlayerInSight() && search_end_timer <= 0.0f)
+	{
+		state_ = Patrol;
+		return;
+	}
+}
+
 
 void Enemy::Draw()
 {
@@ -200,8 +203,6 @@ void Enemy::Draw()
 		{  nowFrame * ENEMY_SIZE, 1 * ENEMY_SIZE, ENEMY_SIZE, ENEMY_SIZE},
 		{  nowFrame * ENEMY_SIZE, 2 * ENEMY_SIZE, ENEMY_SIZE, ENEMY_SIZE}
 	};
-	DrawBox(pos_.x, pos_.y, pos_.x + ENEMY_DRAW_SIZE, pos_.y + ENEMY_DRAW_SIZE,
-		GetColor(255, 255, 0), FALSE, 2);
 	DrawRectExtendGraph(pos_.x, pos_.y, pos_.x + ENEMY_DRAW_SIZE, pos_.y + ENEMY_DRAW_SIZE,
 		iRect[dir_].x, iRect[dir_].y, iRect[dir_].w, iRect[dir_].h, hImage_, TRUE);
 	if (animTimer < 0) {
@@ -272,13 +273,13 @@ bool Enemy::IsAttackRange()
 	//Playerまでの距離
 	float dis = sqrt(diff.x * diff.x + diff.y * diff.y);
 	//視界の距離
-	float attackDis = ENEMY_SIZE;
+	float attackDis = ENEMY_SIZE * 2;
 	//視界外ならfalse
 	if (dis > attackDis || dis <= 0.0f)
 	{
 		return false;
 	}
-	
+
 	if (attackDis >= dis)
 	{
 		return true;

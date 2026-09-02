@@ -23,14 +23,18 @@ public:
 	void Update() override;
 	void PatrolUpdate();
 	void ChaseUpdate();
+	void AttackUpdate();
+	void SearchUpdate();
 	void Draw() override;
-	bool CheckPlayerInSight();
 	bool IsAttackRange();
+	bool CheckPlayerInSight();
 private:
 	bool isFindPlayer_;
 	bool isAttackRange_;
 	float patrol_timer;
 	float chase_timer;
+	float search_timer;
+	float search_end_timer;
 	PANDA_STATE state_;
 };
 

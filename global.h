@@ -27,8 +27,6 @@ enum DIR
 	DOWN,
 	LEFT,
 	RIGHT,
-	NONE,
-	MAX_DIR
 };
 
 const int STAGE_WIDTH = 39;
