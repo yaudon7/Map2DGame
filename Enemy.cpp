@@ -216,7 +216,7 @@ bool Enemy::CheckPlayerInSight()
 	//Player‚Ü‚Å‚Ì‹——£
 	float dis = sqrt(diff.x * diff.x + diff.y * diff.y);
 	//Ž‹ŠE‚Ì‹——£
-	float viewDis = ENEMY_SIZE * 5;
+	float viewDis = ENEMY_SIZE * 7;
 	//Ž‹ŠEŠO‚È‚çfalse
 	if (dis > viewDis || dis <= 0.0f)
 	{
