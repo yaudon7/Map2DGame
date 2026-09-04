@@ -75,8 +75,6 @@ void Player::Draw()
 		{  nowFrame * PLAYER_IMAGE_SIZE, 2 * PLAYER_IMAGE_SIZE, PLAYER_IMAGE_SIZE, PLAYER_IMAGE_SIZE}
 	};
 
-	DrawBox(pos_.x, pos_.y, pos_.x + PLAYER_DRAW_SIZE, pos_.y + PLAYER_DRAW_SIZE,
-		 GetColor(0, 255, 0), FALSE, 1);
 	DrawRectExtendGraph(pos_.x, pos_.y, pos_.x + PLAYER_DRAW_SIZE, pos_.y + PLAYER_DRAW_SIZE,
 		iRect[dir_].x, iRect[dir_].y, iRect[dir_].w, iRect[dir_].h, hImage_, TRUE);
 

@@ -13,7 +13,7 @@ public:
 	Point GetPlayerPos() { return pos_; }
 private:
 	int hImage_;//‰æ‘œID
-	Point pos_;
+	Point pos_;//À•W
 	DIR dir_;//ˆÚ“®•ûŒü
 };
 

@@ -19,10 +19,9 @@ Enemy::Enemy()
 {
 	hImage_ = LoadGraph("Assets/panda_R.png");
 	pos_ = ENEMY_START_POS; //32はブロックの位置pos_
-	dir_ = INIT_ENEMY_DIR;
+	dir_ = INIT_ENEMY_DIR;//方向の初期化
 	state_ = Patrol;
 	isFindPlayer_ = false;
-	isAttackRange_ = false;
 	patrol_timer = 3.0f;
 	chase_timer = 0.0f;
 	search_timer = 1.0f;
@@ -52,7 +51,6 @@ void Enemy::Update()
 	}
 
 	Point newPos = pos_;
-
 	int mapValue = FindGameObject<Stage>()->GetMap(newPos.x / CHA_SIZE, newPos.y / CHA_SIZE);
 	//移動先がステージの外に出ないようにする->壁じゃないなら移動
 	if (mapValue != 1)
@@ -90,7 +88,6 @@ void Enemy::PatrolUpdate()
 		patrol_timer = 3.0f;
 	}
 
-	//playerが視界に入ったら
 	if (CheckPlayerInSight())
 	{
 		isFindPlayer_ = true;
@@ -114,13 +111,11 @@ void Enemy::ChaseUpdate()
 		return;
 	}
 
-	//タイマーを減らす
 	chase_timer -= Time::DeltaTime();
-	//プレイヤーの位置を取得
 	Point playerPos = FindGameObject<Player>()->GetPlayerPos();
 	//EnemyからPlayerへの方向
 	Point diff = { playerPos.x - pos_.x, playerPos.y - pos_.y };
-
+	//Playerのいる方向によってEnemyの方向を決める
 	if (abs(diff.x) > abs(diff.y))
 	{
 		dir_ = (diff.x > 0) ? RIGHT : LEFT;
@@ -156,7 +151,7 @@ void Enemy::ChaseUpdate()
 
 void Enemy::AttackUpdate()
 {
-	DrawFormatString(0, 20, GetColor(255, 0, 0), "Attack!!");
+	DrawFormatString(40, 40, GetColor(255, 0, 0), "Attack!!");
 	if (IsAttackRange() == false)
 	{
 		search_end_timer = 4.0f;
@@ -177,7 +172,7 @@ void Enemy::SearchUpdate()
 		search_timer = 1.0f;
 	}
 
-	if (CheckPlayerInSight())
+	if (IsAttackRange())
 	{
 		state_ = Attack;
 		return;
@@ -255,7 +250,7 @@ bool Enemy::CheckPlayerInSight()
 	//角度を求める
 	float angle = acos(dot) * 180.0f / 3.14159265f;
 	//視界の範囲
-	float viewAngle = 90.0f;
+	float viewAngle = 60.0f;
 	//視界内ならtrue
 	if (angle <= viewAngle)
 	{

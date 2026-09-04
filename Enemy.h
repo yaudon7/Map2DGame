@@ -27,14 +27,13 @@ public:
 	void SearchUpdate();
 	void Draw() override;
 	bool IsAttackRange();
-	bool CheckPlayerInSight();
+	bool CheckPlayerInSight();//Playerが視界に入ったかの関数
 private:
-	bool isFindPlayer_;
-	bool isAttackRange_;
-	float patrol_timer;
-	float chase_timer;
-	float search_timer;
-	float search_end_timer;
-	PANDA_STATE state_;
+	bool isFindPlayer_;//プレイヤーを見つけたか
+	float patrol_timer;//enemyの向いている方向の変更時間
+	float chase_timer;//playerを追跡する移動の間隔時間
+	float search_timer;//捜索する方向の変更時間
+	float search_end_timer;//patrolに戻る時間
+	PANDA_STATE state_;//enemyの状態
 };
 
